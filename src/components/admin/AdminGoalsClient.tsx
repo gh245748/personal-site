@@ -36,13 +36,15 @@ export default function AdminGoalsClient({ initialGoals }: { initialGoals: Goal[
   const [form, setForm] = useState(emptyForm());
   const [milestoneInput, setMilestoneInput] = useState("");
   const [saving, setSaving] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
   const supabase = createClient();
 
-  const openNew = () => { setEditing(null); setForm(emptyForm()); };
+  const openNew = () => { setEditing(null); setForm(emptyForm()); setFormOpen(true); };
 
   const openEdit = (g: Goal) => {
     setEditing(g);
     setForm({ ...g });
+    setFormOpen(true);
   };
 
   const handleSave = async () => {
@@ -64,6 +66,7 @@ export default function AdminGoalsClient({ initialGoals }: { initialGoals: Goal[
         toast.success("Eklendi.");
         setEditing(null);
         setForm(emptyForm());
+        setFormOpen(false);
       } else if (error) toast.error(error.message);
     }
     setSaving(false);
@@ -93,7 +96,7 @@ export default function AdminGoalsClient({ initialGoals }: { initialGoals: Goal[
     setForm((f) => ({ ...f, milestones: f.milestones.filter((_, idx) => idx !== i) }));
   };
 
-  const showForm = editing !== null || form.title !== "";
+  const showForm = formOpen;
 
   return (
     <div className="p-8">
@@ -188,7 +191,7 @@ export default function AdminGoalsClient({ initialGoals }: { initialGoals: Goal[
 
           <div className="flex gap-3">
             <Button onClick={handleSave} loading={saving}>Kaydet</Button>
-            <Button variant="ghost" onClick={() => { setEditing(null); setForm(emptyForm()); }}>İptal</Button>
+            <Button variant="ghost" onClick={() => { setEditing(null); setForm(emptyForm()); setFormOpen(false); }}>İptal</Button>
           </div>
         </div>
       )}

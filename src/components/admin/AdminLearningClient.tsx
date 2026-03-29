@@ -35,6 +35,7 @@ export default function AdminLearningClient({ initialCards }: { initialCards: Ca
   const [editing, setEditing] = useState<Card | null>(null);
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
   const [reviewCard, setReviewCard] = useState<Card | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const supabase = createClient();
@@ -46,8 +47,8 @@ export default function AdminLearningClient({ initialCards }: { initialCards: Ca
     (c) => c.due_date && new Date(c.due_date) <= today
   );
 
-  const openNew = () => { setEditing(null); setForm(emptyForm()); };
-  const openEdit = (c: Card) => { setEditing(c); setForm({ front: c.front, back: c.back, topic: c.topic, category: c.category }); };
+  const openNew = () => { setEditing(null); setForm(emptyForm()); setFormOpen(true); };
+  const openEdit = (c: Card) => { setEditing(c); setForm({ front: c.front, back: c.back, topic: c.topic, category: c.category }); setFormOpen(true); };
 
   const handleSave = async () => {
     if (!form.front.trim() || !form.back.trim()) return toast.error("Ön yüz ve arka yüz boş olamaz.");
@@ -59,7 +60,7 @@ export default function AdminLearningClient({ initialCards }: { initialCards: Ca
       else toast.error(error.message);
     } else {
       const { data, error } = await supabase.from("learning_items").insert(form).select().single();
-      if (!error && data) { setCards((c) => [data, ...c]); toast.success("Eklendi."); setEditing(null); setForm(emptyForm()); }
+      if (!error && data) { setCards((c) => [data, ...c]); toast.success("Eklendi."); setEditing(null); setForm(emptyForm()); setFormOpen(false); }
       else if (error) toast.error(error.message);
     }
     setSaving(false);
@@ -102,7 +103,7 @@ export default function AdminLearningClient({ initialCards }: { initialCards: Ca
     else { setReviewCard(null); setShowAnswer(false); toast.success("Tüm kartlar çalışıldı!"); }
   };
 
-  const showForm = editing !== null || form.front !== "";
+  const showForm = formOpen;
 
   return (
     <div className="p-8">
@@ -195,7 +196,7 @@ export default function AdminLearningClient({ initialCards }: { initialCards: Ca
           </div>
           <div className="flex gap-3">
             <Button onClick={handleSave} loading={saving}>Kaydet</Button>
-            <Button variant="ghost" onClick={() => { setEditing(null); setForm(emptyForm()); }}>İptal</Button>
+            <Button variant="ghost" onClick={() => { setEditing(null); setForm(emptyForm()); setFormOpen(false); }}>İptal</Button>
           </div>
         </div>
       )}

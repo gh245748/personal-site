@@ -38,10 +38,11 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
   const [form, setForm] = useState(emptyForm());
   const [stackInput, setStackInput] = useState("");
   const [saving, setSaving] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
   const supabase = createClient();
 
-  const openNew = () => { setEditing(null); setForm(emptyForm()); setStackInput(""); };
-  const openEdit = (p: Project) => { setEditing(p); setForm({ ...p }); setStackInput(p.stack.join(", ")); };
+  const openNew = () => { setEditing(null); setForm(emptyForm()); setStackInput(""); setFormOpen(true); };
+  const openEdit = (p: Project) => { setEditing(p); setForm({ ...p }); setStackInput(p.stack.join(", ")); setFormOpen(true); };
 
   const handleSave = async () => {
     if (!form.title.trim()) return toast.error("Başlık boş olamaz.");
@@ -62,7 +63,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
       else toast.error(error.message);
     } else {
       const { data, error } = await supabase.from("projects").insert(payload).select().single();
-      if (!error && data) { setProjects((p) => [data, ...p]); toast.success("Eklendi."); setEditing(null); setForm(emptyForm()); }
+      if (!error && data) { setProjects((p) => [data, ...p]); toast.success("Eklendi."); setEditing(null); setForm(emptyForm()); setFormOpen(false); }
       else if (error) toast.error(error.message);
     }
     setSaving(false);
@@ -75,7 +76,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
     toast.success("Silindi.");
   };
 
-  const showForm = editing !== null || form.title !== "";
+  const showForm = formOpen;
 
   return (
     <div className="p-8">
@@ -137,7 +138,7 @@ export default function AdminProjectsClient({ initialProjects }: { initialProjec
           </div>
           <div className="flex gap-3">
             <Button onClick={handleSave} loading={saving}>Kaydet</Button>
-            <Button variant="ghost" onClick={() => { setEditing(null); setForm(emptyForm()); }}>İptal</Button>
+            <Button variant="ghost" onClick={() => { setEditing(null); setForm(emptyForm()); setFormOpen(false); }}>İptal</Button>
           </div>
         </div>
       )}
