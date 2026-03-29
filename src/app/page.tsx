@@ -3,7 +3,7 @@ import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/home/HeroSection";
 import LatestPosts from "@/components/home/LatestPosts";
 import FeaturedGoals from "@/components/home/FeaturedGoals";
-import LearningStats from "@/components/home/LearningStats";
+import UpcomingEvents from "@/components/home/UpcomingEvents";
 import { createClient } from "@/lib/supabase/server";
 
 export const revalidate = 3600;
@@ -11,7 +11,9 @@ export const revalidate = 3600;
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const [postsResult, goalsResult, learningResult] = await Promise.all([
+  const today = new Date().toISOString().split("T")[0];
+
+  const [postsResult, goalsResult, eventsResult] = await Promise.all([
     supabase
       .from("blog_posts")
       .select("id, slug, title, subtitle, tags, reading_time, published_at")
@@ -25,22 +27,16 @@ export default async function HomePage() {
       .order("created_at", { ascending: false })
       .limit(4),
     supabase
-      .from("learning_items")
-      .select("repetitions, due_date"),
+      .from("events")
+      .select("id, title, date, type, color")
+      .gte("date", today)
+      .order("date", { ascending: true })
+      .limit(5),
   ]);
 
   const posts = postsResult.data ?? [];
   const goals = goalsResult.data ?? [];
-  const allCards = learningResult.data ?? [];
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const dueToday = allCards.filter(
-    (c) => c.due_date && new Date(c.due_date) <= today
-  ).length;
-
-  const mastered = allCards.filter((c) => c.repetitions >= 6).length;
+  const upcomingEvents = eventsResult.data ?? [];
 
   return (
     <div className="min-h-screen bg-obsidian">
@@ -58,19 +54,13 @@ export default async function HomePage() {
             <span className="text-[hsl(var(--border))]">/</span>
             <span>{goals.length} aktif hedef</span>
             <span className="text-[hsl(var(--border))]">/</span>
-            <span>{allCards.length} öğrenme kartı</span>
-            <span className="text-[hsl(var(--border))]">/</span>
-            <span>{dueToday} bugün bekleyen</span>
+            <span>{upcomingEvents.length} yaklaşan etkinlik</span>
           </div>
         </div>
 
         <LatestPosts posts={posts} />
         <FeaturedGoals goals={goals} />
-        <LearningStats
-          totalCards={allCards.length}
-          dueToday={dueToday}
-          masteredCards={mastered}
-        />
+        <UpcomingEvents events={upcomingEvents} />
       </main>
       <Footer />
     </div>

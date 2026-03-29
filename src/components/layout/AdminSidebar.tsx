@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, FileText, Target, Briefcase,
-  BookOpen, Brain, LogOut, ExternalLink,
+  BookOpen, CalendarDays, LogOut, ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -15,7 +15,7 @@ const navItems = [
   { href: "/admin/goals",     label: "Hedefler",   icon: Target },
   { href: "/admin/projects",  label: "Projeler",   icon: Briefcase },
   { href: "/admin/notes",     label: "Notlar",     icon: BookOpen },
-  { href: "/admin/learning",  label: "Öğrenme",    icon: Brain },
+  { href: "/admin/calendar",  label: "Takvim",     icon: CalendarDays },
 ];
 
 export default function AdminSidebar() {

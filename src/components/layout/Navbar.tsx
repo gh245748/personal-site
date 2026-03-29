@@ -13,7 +13,7 @@ const navLinks = [
   { href: "/goals",    label: "Hedefler" },
   { href: "/projects", label: "Projeler" },
   { href: "/notes",    label: "Notlar" },
-  { href: "/learning", label: "Öğrenme" },
+  { href: "/calendar", label: "Takvim" },
 ];
 
 export default function Navbar() {
