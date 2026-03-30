@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ExternalLink, GitBranch, ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 import Badge from "@/components/ui/Badge";
 import Link from "next/link";
 
@@ -42,11 +43,11 @@ export default function ProjectCard({ project, index = 0 }: { project: Project; 
       {/* Cover */}
       <div className="h-36 bg-gradient-to-br from-[hsl(var(--surface))] to-obsidian relative overflow-hidden">
         {project.cover_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={project.cover_url}
             alt={project.title}
-            className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300"
+            fill
+            className="object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300"
           />
         ) : (
           <div
@@ -88,12 +89,14 @@ export default function ProjectCard({ project, index = 0 }: { project: Project; 
       {/* Body */}
       <div className="p-5">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3
-            className="text-[#F0EDE4] text-lg leading-tight"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            {project.title}
-          </h3>
+          <Link href={`/projects/${project.id}`}>
+            <h3
+              className="text-[#F0EDE4] text-lg leading-tight hover:text-amber transition-colors"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              {project.title}
+            </h3>
+          </Link>
           <Badge variant={statusVariant[project.status] ?? "default"}>
             {statusLabel[project.status] ?? project.status}
           </Badge>

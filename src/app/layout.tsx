@@ -26,16 +26,25 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Batuhan M.",
     template: "%s — Batuhan M.",
   },
-  description: "Builder. Learner. Observer. Personal knowledge base, blog, and learning tracker.",
+  description: "Yazar. Öğrenir. İnşa Eder. Kişisel blog, hedefler, projeler ve notlar.",
   openGraph: {
     type: "website",
     locale: "tr_TR",
     siteName: "Batuhan M.",
+    url: SITE_URL,
+  },
+  alternates: {
+    types: {
+      "application/rss+xml": `${SITE_URL}/feed.xml`,
+    },
   },
 };
 

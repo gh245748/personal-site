@@ -27,11 +27,11 @@ const TYPE_COLOR: Record<string, string> = {
   book:    "#D4872A",
   film:    "#5599E8",
   article: "#55C888",
-  album:   "#C855E8",
+  music:   "#C855E8",
 };
 
 const TYPE_LABEL: Record<string, string> = {
-  book: "Kitap", film: "Film", article: "Makale", album: "Albüm",
+  book: "Kitap", film: "Film", article: "Makale", music: "Müzik",
 };
 
 function nodeRadius(rating: number | null | undefined) {

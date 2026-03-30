@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Star } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
 import Modal from "@/components/ui/Modal";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -22,7 +23,7 @@ interface Note {
 }
 
 const typeLabel: Record<string, string> = {
-  book: "Kitap", film: "Film", article: "Makale", album: "Albüm",
+  book: "Kitap", film: "Film", article: "Makale", music: "Müzik",
 };
 
 export default function NoteCard({ note, index = 0 }: { note: Note; index?: number }) {
@@ -41,11 +42,11 @@ export default function NoteCard({ note, index = 0 }: { note: Note; index?: numb
         {/* Cover */}
         <div className="h-44 bg-[hsl(var(--surface))] relative overflow-hidden">
           {note.cover_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={note.cover_url}
               alt={note.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
             <div
@@ -105,12 +106,14 @@ export default function NoteCard({ note, index = 0 }: { note: Note; index?: numb
           <Modal open={open} onClose={() => setOpen(false)} title={note.title} size="lg">
             <div className="flex gap-5 mb-6">
               {note.cover_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={note.cover_url}
-                  alt={note.title}
-                  className="w-24 h-36 object-cover rounded-sm shrink-0"
-                />
+                <div className="w-24 h-36 relative shrink-0 rounded-sm overflow-hidden">
+                  <Image
+                    src={note.cover_url}
+                    alt={note.title}
+                    fill
+                    className="object-cover rounded-sm"
+                  />
+                </div>
               )}
               <div>
                 {note.author && (

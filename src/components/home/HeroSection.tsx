@@ -32,7 +32,7 @@ export default function HeroSection() {
             className="text-xs tracking-[0.3em] text-amber uppercase"
             style={{ fontFamily: "var(--font-mono)" }}
           >
-            Personal Knowledge Base
+            Yazar · Öğrenir · İnşa Eder
           </span>
         </motion.div>
 

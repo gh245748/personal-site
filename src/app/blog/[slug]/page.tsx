@@ -8,11 +8,17 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import Badge from "@/components/ui/Badge";
+import Link from "next/link";
 import { Clock, Calendar } from "lucide-react";
+import ViewCounter from "@/components/blog/ViewCounter";
+import ReadingProgress from "@/components/blog/ReadingProgress";
 
 export const revalidate = 3600;
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ preview?: string }>;
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -21,44 +27,63 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .from("blog_posts")
     .select("title, subtitle")
     .eq("slug", slug)
-    .eq("status", "published")
     .single();
 
   if (!data) return { title: "Yazı Bulunamadı" };
-  return {
-    title: data.title,
-    description: data.subtitle ?? undefined,
-  };
+  return { title: data.title, description: data.subtitle ?? undefined };
 }
 
-export default async function BlogPostPage({ params }: Props) {
+export default async function BlogPostPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { preview } = await searchParams;
   const supabase = await createClient();
 
-  const { data: post } = await supabase
-    .from("blog_posts")
-    .select("*")
-    .eq("slug", slug)
-    .eq("status", "published")
-    .single();
+  // Draft preview: allow non-published posts only for authenticated users
+  let query = supabase.from("blog_posts").select("*").eq("slug", slug);
 
+  if (preview === "1") {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return notFound();
+    // no status filter — show draft
+  } else {
+    query = query.eq("status", "published");
+  }
+
+  const { data: post } = await query.single();
   if (!post) notFound();
+
+  // Related posts: same tags, exclude current
+  const { data: related } = post.tags?.length
+    ? await supabase
+        .from("blog_posts")
+        .select("id, slug, title, subtitle, tags, reading_time, published_at")
+        .eq("status", "published")
+        .neq("slug", slug)
+        .overlaps("tags", post.tags)
+        .limit(3)
+    : { data: [] };
 
   return (
     <div className="min-h-screen bg-obsidian">
       <Navbar />
+      <ReadingProgress />
 
-      {/* Progress bar placeholder — would use scroll listener in client */}
-      <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-[hsl(var(--border))]">
-        <div className="h-full bg-amber w-0" id="reading-progress" />
-      </div>
+      {/* Draft banner */}
+      {preview === "1" && post.status !== "published" && (
+        <div className="fixed top-1 left-1/2 -translate-x-1/2 z-40 px-4 py-1.5 bg-amber text-obsidian text-xs font-medium rounded-sm shadow-lg"
+          style={{ fontFamily: "var(--font-mono)" }}>
+          TASLAK ÖNİZLEME
+        </div>
+      )}
 
       <main className="pt-24 pb-20">
         {/* Hero */}
         <div className="max-w-3xl mx-auto px-6 mb-16">
           <div className="flex flex-wrap gap-1.5 mb-6">
             {post.tags.map((tag: string) => (
-              <Badge key={tag} variant="amber">{tag}</Badge>
+              <Link key={tag} href={`/blog?tag=${encodeURIComponent(tag)}`}>
+                <Badge variant="amber">{tag}</Badge>
+              </Link>
             ))}
           </div>
 
@@ -99,6 +124,7 @@ export default async function BlogPostPage({ params }: Props) {
                 {post.reading_time} dakika okuma
               </span>
             )}
+            <ViewCounter slug={post.slug} initialViews={post.views ?? 0} />
           </div>
         </div>
 
@@ -113,6 +139,52 @@ export default async function BlogPostPage({ params }: Props) {
             </ReactMarkdown>
           </div>
         </div>
+
+        {/* Related posts */}
+        {related && related.length > 0 && (
+          <div className="max-w-3xl mx-auto px-6 mt-20 pt-12 border-t border-[hsl(var(--border))]">
+            <p
+              className="text-xs tracking-[0.3em] text-amber uppercase mb-6"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              İlgili Yazılar
+            </p>
+            <div className="flex flex-col gap-4">
+              {related.map((r) => (
+                <Link
+                  key={r.id}
+                  href={`/blog/${r.slug}`}
+                  className="group flex items-start gap-4 p-4 border border-[hsl(var(--border))] rounded-sm hover:border-amber/40 bg-[hsl(var(--surface-2))] transition-colors"
+                >
+                  <div className="flex-1">
+                    <h3
+                      className="text-[#F0EDE4] group-hover:text-amber transition-colors text-base leading-snug mb-1"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      {r.title}
+                    </h3>
+                    {r.subtitle && (
+                      <p className="text-xs text-[hsl(var(--muted))] line-clamp-1">{r.subtitle}</p>
+                    )}
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {(r.tags ?? []).slice(0, 3).map((t: string) => (
+                        <Badge key={t} variant="default">{t}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                  {r.reading_time && (
+                    <span
+                      className="text-xs text-[hsl(var(--muted))] shrink-0 mt-0.5"
+                      style={{ fontFamily: "var(--font-mono)" }}
+                    >
+                      {r.reading_time}dk
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
 
       <Footer />

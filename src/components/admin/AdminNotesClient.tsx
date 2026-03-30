@@ -130,7 +130,7 @@ export default function AdminNotesClient({
   const noteType = (id: string) => notes.find((n) => n.id === id)?.type ?? "";
 
   const TYPE_COLOR: Record<string, string> = {
-    book: "#D4872A", film: "#5599E8", article: "#55C888", album: "#C855E8",
+    book: "#D4872A", film: "#5599E8", article: "#55C888", music: "#C855E8",
   };
 
   return (
@@ -226,7 +226,7 @@ export default function AdminNotesClient({
                     onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
                     className="w-full px-3 py-2 bg-[hsl(var(--surface-2))] border border-[hsl(var(--border))] rounded-sm text-sm text-[#F0EDE4] focus:outline-none focus:border-amber"
                   >
-                    {["book", "film", "article", "album"].map((o) => (
+                    {["book", "film", "article", "music"].map((o) => (
                       <option key={o}>{o}</option>
                     ))}
                   </select>

@@ -29,7 +29,7 @@ const TYPES = [
   { key: "book",    label: "Kitaplar" },
   { key: "film",    label: "Filmler" },
   { key: "article", label: "Makaleler" },
-  { key: "album",   label: "Albümler" },
+  { key: "music",   label: "Müzik" },
 ];
 
 export default function NotesPageClient({
